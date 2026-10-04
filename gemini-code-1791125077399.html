@@ -1,0 +1,2042 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>游戏综合万能助手工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'sans-serif'],
+                    },
+                    colors: {
+                        game: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            cardBorder: '#334155',
+                            gold: '#fbbf24',
+                            goldHover: '#f59e0b',
+                            star: '#38bdf8',
+                            moon: '#c084fc',
+                            sun: '#f97316',
+                            srank: '#ef4444',
+                            ssrank: '#eab308',
+                            stone: '#06b6d4'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ================= 1. 逃出生天全局样式 ================= */
+        :root[data-theme="dark"] {
+            --tc-bg-color: #0d0d0d;
+            --tc-card-bg: #1e1e1e;
+            --tc-card-border: #333333;
+            --tc-text-color: #ffffff;
+            --tc-text-secondary: #aaaaaa;
+            --tc-watermark-color: rgba(255, 255, 255, 0.35);
+            --tc-btn-active: #333333;
+            --tc-reset-btn-bg: #ff3b30;
+            --tc-undo-btn-bg: #2c2c2e;
+            --tc-start-btn-bg: #34c759;
+            --tc-next-btn-bg: #007aff;
+            --tc-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            --tc-history-item-bg: #2a2a2c;
+            --tc-active-item-bg: #1c4b2a;
+        }
+
+        :root[data-theme="light"] {
+            --tc-bg-color: #f2f2f7;
+            --tc-card-bg: #ffffff;
+            --tc-card-border: #e5e5ea;
+            --tc-text-color: #000000;
+            --tc-text-secondary: #8e8e93;
+            --tc-watermark-color: rgba(0, 0, 0, 0.35);
+            --tc-btn-active: #e5e5ea;
+            --tc-reset-btn-bg: #ff3b30;
+            --tc-undo-btn-bg: #e5e5ea;
+            --tc-start-btn-bg: #34c759;
+            --tc-next-btn-bg: #007aff;
+            --tc-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --tc-history-item-bg: #eef0f2;
+            --tc-active-item-bg: #d1e7dd;
+        }
+
+        /* 逃出生天专属隔离类 */
+        .tc-scope {
+            background-color: var(--tc-bg-color);
+            color: var(--tc-text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            position: relative;
+            min-height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        .tc-scope::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='120'><text x='20' y='60' fill='rgba(128,128,128,0.08)' font-size='14' font-family='sans-serif' transform='rotate(-22 100 60)'>3k887忆春风出品</text></svg>");
+            background-repeat: repeat;
+        }
+
+        .tc-scope header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 4px;
+            z-index: 1;
+        }
+
+        .tc-scope h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .tc-scope .theme-toggle {
+            background: var(--tc-card-bg);
+            border: 1px solid var(--tc-card-border);
+            color: var(--tc-text-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: var(--tc-shadow);
+            transition: all 0.2s;
+        }
+
+        .tc-scope .history-section {
+            width: 100%;
+            max-width: 360px;
+            background-color: var(--tc-card-bg);
+            border: 1px solid var(--tc-card-border);
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: var(--tc-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1;
+        }
+
+        .tc-scope .history-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--tc-text-secondary);
+        }
+
+        .tc-scope .history-list {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            min-height: 42px;
+            align-items: center;
+            scroll-behavior: smooth;
+        }
+
+        .tc-scope .history-list::-webkit-scrollbar { display: none; }
+
+        .tc-scope .history-item {
+            background-color: var(--tc-history-item-bg);
+            color: var(--tc-text-color);
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            white-space: nowrap;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .tc-scope .history-item .step-num {
+            font-size: 0.75rem;
+            color: var(--tc-text-secondary);
+            font-weight: normal;
+        }
+
+        .tc-scope .history-item.active {
+            border: 2px solid #34c759;
+            background-color: var(--tc-active-item-bg);
+            transform: scale(1.08);
+        }
+
+        .tc-scope .step-banner {
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            color: #34c759;
+            height: 24px;
+            line-height: 24px;
+        }
+
+        .tc-scope .empty-tip {
+            font-size: 0.85rem;
+            color: var(--tc-text-secondary);
+            text-align: center;
+            width: 100%;
+        }
+
+        .tc-scope .pad-container {
+            width: 100%;
+            max-width: 320px;
+            aspect-ratio: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 12px;
+            margin: auto 0;
+            transition: opacity 0.3s;
+            z-index: 1;
+        }
+
+        .tc-scope .pad-container.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .tc-scope .dir-btn {
+            background-color: var(--tc-card-bg);
+            border: 1px solid var(--tc-card-border);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: var(--tc-shadow);
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.1s;
+        }
+
+        .tc-scope .dir-btn:active {
+            transform: scale(0.92);
+            background-color: var(--tc-btn-active);
+        }
+
+        .tc-scope .btn-up    { grid-column: 2; grid-row: 1; }
+        .tc-scope .btn-left  { grid-column: 1; grid-row: 2; }
+        .tc-scope .btn-center{ grid-column: 2; grid-row: 2; border: none; background: transparent; box-shadow: none; pointer-events: none;}
+        .tc-scope .btn-right { grid-column: 3; grid-row: 2; }
+        .tc-scope .btn-down  { grid-column: 2; grid-row: 3; }
+
+        .tc-scope footer {
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .tc-scope .btn-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .tc-scope .action-btn {
+            flex: 1;
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        .tc-scope .undo-btn { background-color: var(--tc-undo-btn-bg); color: var(--tc-text-color); border: 1px solid var(--tc-card-border); }
+        .tc-scope .reset-btn { background-color: var(--tc-reset-btn-bg); color: #ffffff; }
+        .tc-scope .start-btn { background-color: var(--tc-start-btn-bg); color: #ffffff; }
+        .tc-scope .next-btn { background-color: var(--tc-next-btn-bg); color: #ffffff; }
+
+        .tc-scope .action-btn:active {
+            transform: scale(0.97);
+            opacity: 0.85;
+        }
+
+        .tc-scope .watermark {
+            font-size: 0.75rem;
+            color: var(--tc-watermark-color);
+            letter-spacing: 1px;
+            font-weight: 500;
+            pointer-events: none;
+            padding-bottom: 4px;
+        }
+
+
+        /* ================= 2. 遗迹挂机计算器全局样式 ================= */
+        .yj-scope {
+            --yj-bg-primary: #0d1117;
+            --yj-bg-card: #161b22;
+            --yj-bg-card-hover: #1f242d;
+            --yj-border-color: #30363d;
+            --yj-text-primary: #f0f6fc;
+            --yj-text-secondary: #8b949e;
+            --yj-accent-gold: #f1e05a;
+            --yj-accent-cyan: #38bdf8;
+            --yj-accent-purple: #c084fc;
+            --yj-accent-green: #4ade80;
+            --yj-accent-orange: #fb923c;
+            --yj-accent-pink: #f472b6;
+
+            background-color: var(--yj-bg-primary);
+            color: var(--yj-text-primary);
+            padding: 16px;
+            min-height: calc(100vh - 60px);
+            display: flex;
+            justify-content: center;
+            position: relative;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .yj-scope::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.06;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='150'><text x='20' y='80' fill='%23ffffff' font-size='16' font-family='sans-serif' transform='rotate(-25 100 80)'>3k887忆春风出品</text></svg>");
+            background-repeat: repeat;
+        }
+
+        .yj-scope .container {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .yj-scope header {
+            text-align: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--yj-border-color);
+        }
+
+        .yj-scope header h1 {
+            font-size: 1.6rem;
+            color: var(--yj-accent-gold);
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .yj-scope header p {
+            color: var(--yj-text-secondary);
+            font-size: 0.85rem;
+            margin-top: 6px;
+        }
+
+        .yj-scope .relic-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .yj-scope .relic-card {
+            background: var(--yj-bg-card);
+            border: 2px solid var(--yj-border-color);
+            border-radius: 12px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .yj-scope .relic-card:hover {
+            border-color: var(--yj-accent-cyan);
+            transform: translateY(-2px);
+        }
+
+        .yj-scope .relic-card.active {
+            border-color: var(--yj-accent-gold);
+            background: linear-gradient(145deg, rgba(241, 224, 90, 0.08), rgba(22, 27, 34, 0.95));
+            box-shadow: 0 0 15px rgba(241, 224, 90, 0.2);
+        }
+
+        .yj-scope .relic-card .title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .yj-scope .relic-card .rate {
+            font-size: 0.8rem;
+            color: var(--yj-text-secondary);
+        }
+
+        .yj-scope .relic-card .badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 6px;
+            font-weight: 600;
+        }
+
+        .yj-scope .relic-card[data-type="small"] .title { color: var(--yj-accent-green); }
+        .yj-scope .relic-card[data-type="small"] .badge { background: rgba(74, 222, 128, 0.15); color: var(--yj-accent-green); }
+
+        .yj-scope .relic-card[data-type="medium"] .title { color: var(--yj-accent-cyan); }
+        .yj-scope .relic-card[data-type="medium"] .badge { background: rgba(56, 189, 248, 0.15); color: var(--yj-accent-cyan); }
+
+        .yj-scope .relic-card[data-type="large"] .title { color: var(--yj-accent-purple); }
+        .yj-scope .relic-card[data-type="large"] .badge { background: rgba(192, 132, 252, 0.15); color: var(--yj-accent-purple); }
+
+        .yj-scope .relic-card[data-type="mega"] .title { color: var(--yj-accent-orange); }
+        .yj-scope .relic-card[data-type="mega"] .badge { background: rgba(251, 146, 60, 0.15); color: var(--yj-accent-orange); }
+
+        .yj-scope .nav-tabs {
+            display: flex;
+            background: var(--yj-bg-card);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--yj-border-color);
+        }
+
+        .yj-scope .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            color: var(--yj-text-secondary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .yj-scope .tab-btn.active {
+            background: var(--yj-border-color);
+            color: var(--yj-accent-gold);
+        }
+
+        .yj-scope .panel {
+            background: var(--yj-bg-card);
+            border: 1px solid var(--yj-border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .yj-scope .panel-title {
+            font-size: 1.1rem;
+            color: var(--yj-accent-cyan);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px dashed var(--yj-border-color);
+            padding-bottom: 8px;
+        }
+
+        .yj-scope .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .yj-scope .input-label {
+            font-size: 0.9rem;
+            color: var(--yj-text-secondary);
+        }
+
+        .yj-scope .input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .yj-scope .custom-input {
+            flex: 1;
+            background: var(--yj-bg-primary);
+            border: 1px solid var(--yj-border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--yj-text-primary);
+            font-size: 1.2rem;
+            font-weight: bold;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .yj-scope .custom-input:focus {
+            border-color: var(--yj-accent-gold);
+        }
+
+        .yj-scope .unit {
+            font-weight: bold;
+            color: var(--yj-accent-gold);
+            font-size: 1.1rem;
+        }
+
+        .yj-scope .quick-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .yj-scope .btn-chip {
+            background: var(--yj-bg-primary);
+            border: 1px solid var(--yj-border-color);
+            color: var(--yj-text-secondary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .yj-scope .btn-chip:hover {
+            border-color: var(--yj-accent-cyan);
+            color: var(--yj-text-primary);
+        }
+
+        .yj-scope .btn-chip.clear {
+            border-color: rgba(244, 114, 182, 0.4);
+            color: var(--yj-accent-pink);
+        }
+
+        .yj-scope .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .yj-scope .res-card {
+            background: var(--yj-bg-primary);
+            border: 1px solid var(--yj-border-color);
+            border-radius: 10px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .yj-scope .res-card .label {
+            font-size: 0.8rem;
+            color: var(--yj-text-secondary);
+        }
+
+        .yj-scope .res-card .val {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--yj-text-primary);
+        }
+
+        .yj-scope .res-card .sub {
+            font-size: 0.75rem;
+            color: var(--yj-text-secondary);
+        }
+
+        .yj-scope .progress-box {
+            background: var(--yj-bg-primary);
+            border: 1px solid var(--yj-border-color);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .yj-scope .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .yj-scope .progress-track {
+            width: 100%;
+            height: 12px;
+            background: #21262d;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .yj-scope .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--yj-accent-cyan), var(--yj-accent-gold));
+            width: 0%;
+            transition: width 0.4s ease;
+            border-radius: 6px;
+        }
+
+        .yj-scope .progress-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--yj-text-secondary);
+            margin-top: 6px;
+        }
+
+        .yj-scope .gap-highlight {
+            color: var(--yj-accent-pink);
+            font-weight: bold;
+        }
+
+        .yj-scope .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--yj-border-color);
+            border-radius: 8px;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .yj-scope table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .yj-scope th {
+            background: var(--yj-bg-primary);
+            position: sticky;
+            top: 0;
+            color: var(--yj-text-secondary);
+            padding: 10px 12px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--yj-border-color);
+            z-index: 10;
+        }
+
+        .yj-scope td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+            color: var(--yj-text-primary);
+        }
+
+        .yj-scope tbody tr {
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .yj-scope tbody tr:hover {
+            background: var(--yj-bg-card-hover);
+        }
+
+        .yj-scope tr.active-row {
+            background: rgba(241, 224, 90, 0.18) !important;
+            border-left: 4px solid var(--yj-accent-gold);
+            font-weight: bold;
+        }
+
+        .yj-scope tr.target-row {
+            background: rgba(56, 189, 248, 0.18) !important;
+            border-left: 4px solid var(--yj-accent-cyan);
+            font-weight: bold;
+        }
+
+        .yj-scope tr.next-row {
+            background: rgba(56, 189, 248, 0.08);
+            border-left: 3px dashed var(--yj-accent-cyan);
+        }
+
+        .yj-scope .hidden {
+            display: none !important;
+        }
+
+
+        /* ================= 3. 将领合成计算机全局样式 ================= */
+        .jl-scope {
+            background-color: #0b0f19;
+            background-image: 
+                radial-gradient(at 20% 20%, rgba(251, 191, 36, 0.05) 0px, transparent 50%),
+                radial-gradient(at 80% 80%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
+            color: #f1f5f9;
+            position: relative;
+            min-height: calc(100vh - 60px);
+            padding: 1.5rem 0.75rem;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        .jl-scope .watermark-grid-bg {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            z-index: 1;
+            pointer-events: none;
+            user-select: none;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            justify-content: space-around;
+            transform: rotate(-22deg);
+            opacity: 0.11;
+        }
+
+        .jl-scope .watermark-item {
+            font-size: 15px;
+            font-weight: 800;
+            color: #f59e0b;
+            padding: 35px 45px;
+            white-space: nowrap;
+            letter-spacing: 1px;
+            text-shadow: 0 0 2px rgba(0,0,0,0.8);
+        }
+
+        .jl-scope .gold-gradient-text {
+            background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .jl-scope .glass-panel {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
+
+        .jl-scope input[type=number]::-webkit-inner-spin-button,
+        .jl-scope input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .jl-scope input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .jl-scope .card-corner-watermark {
+            position: absolute;
+            bottom: 4px;
+            right: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(245, 158, 11, 0.25);
+            pointer-events: none;
+            user-select: none;
+            letter-spacing: 0.5px;
+        }
+
+        .jl-scope .input-watermark-bg {
+            background-image: linear-gradient(135deg, rgba(245, 158, 11, 0.03) 25%, transparent 25%, transparent 50%, rgba(245, 158, 11, 0.03) 50%, rgba(245, 158, 11, 0.03) 75%, transparent 75%, transparent);
+            background-size: 20px 20px;
+        }
+
+        /* 顶部导航控制 */
+        .app-nav {
+            background: #090d16;
+            border-bottom: 1px solid #1e293b;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 10000;
+        }
+
+        .app-nav-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #94a3b8;
+            background: #1e293b;
+            border: 1px solid #334155;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .app-nav-btn.active {
+            background: #f59e0b;
+            color: #0f172a;
+            border-color: #fef08a;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+        }
+
+        .app-view {
+            display: none;
+        }
+
+        .app-view.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+    <!-- 万能整合导航栏 -->
+    <nav class="app-nav">
+        <button class="app-nav-btn active" onclick="switchAppView('jiangling')">
+            <i class="fa-solid fa-chess-knight"></i> 将领合成计算机
+        </button>
+        <button class="app-nav-btn" onclick="switchAppView('yiji')">
+            <i class="fa-solid fa-landmark"></i> 遗迹载重匹配与计算
+        </button>
+        <button class="app-nav-btn" onclick="switchAppView('tcst')">
+            <i class="fa-solid fa-compass"></i> 逃出生天工具
+        </button>
+    </nav>
+
+    <!-- 视图 1: 将领合成计算机 -->
+    <div id="app-jiangling" class="app-view active">
+        <div class="jl-scope">
+            <!-- 全屏平铺背景水印 -->
+            <div class="watermark-grid-bg" id="watermark-container"></div>
+
+            <div class="max-w-5xl mx-auto space-y-6 relative z-10">
+
+                <!-- 顶部 Header 标题与模式切换 -->
+                <header class="glass-panel rounded-2xl p-4 sm:p-6 text-center relative overflow-hidden border border-amber-500/20 shadow-2xl">
+                    <div class="absolute -right-6 -top-2 text-[55px] font-black text-amber-500/5 select-none pointer-events-none rotate-12">
+                        3k887忆春风制作
+                    </div>
+                    <div class="absolute -left-6 -bottom-2 text-[40px] font-black text-amber-500/5 select-none pointer-events-none -rotate-12">
+                        3k887忆春风制作
+                    </div>
+
+                    <div class="relative z-10">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold mb-2 shadow-inner">
+                            <i class="fa-solid fa-certificate text-amber-400"></i>
+                            <span>正版水印出品：<strong class="text-amber-300">3k887忆春风制作</strong></span>
+                        </div>
+                        <h1 class="text-3xl sm:text-4xl font-black tracking-wide gold-gradient-text mb-2">
+                            将领合成计算机
+                        </h1>
+                        <p class="text-slate-400 text-xs sm:text-sm max-w-xl mx-auto">
+                            支持将领合成折算、进阶石需求精算、双向缺口分析及受限合成预测
+                        </p>
+
+                        <!-- 模式切换开关 -->
+                        <div class="mt-5 inline-flex p-1.5 rounded-xl bg-slate-900/80 border border-slate-700/80 relative">
+                            <button id="mode-normal-btn" onclick="setMode('normal')" class="relative z-10 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 text-white bg-slate-800 shadow-lg border border-slate-600">
+                                <i class="fa-solid fa-scale-balanced text-slate-400"></i>
+                                常规模式 <span class="text-xs px-2 py-0.5 rounded bg-slate-700 text-amber-300">6 合 1</span>
+                            </button>
+                            <button id="mode-event-btn" onclick="setMode('event')" class="relative z-10 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 text-slate-400 hover:text-white">
+                                <i class="fa-solid fa-bolt text-red-400"></i>
+                                限时活动 <span class="text-xs px-2 py-0.5 rounded bg-red-950 text-red-300 border border-red-800">5 合 1</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-corner-watermark">【3k887忆春风制作】</div>
+                </header>
+
+                <!-- 主内容区域：两列布局 -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                    <!-- 左侧：输入面板 -->
+                    <div class="lg:col-span-5 space-y-6">
+                        <!-- 1. 当前库存输入（将领 + 进阶石） -->
+                        <div class="glass-panel rounded-2xl p-5 border border-slate-700/60 shadow-xl relative overflow-hidden">
+                            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-700/50">
+                                <h2 class="text-lg font-bold flex items-center gap-2 text-amber-400">
+                                    <i class="fa-solid fa-boxes-stacked"></i> 当前拥有的资源
+                                </h2>
+                                <div class="flex gap-2">
+                                    <button onclick="fillDemoData()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 transition">
+                                        示例数据
+                                    </button>
+                                    <button onclick="clearInventory()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-red-900/40 text-slate-300 hover:text-red-300 border border-slate-600 transition">
+                                        清空
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 输入项列表 -->
+                            <div class="space-y-2.5 input-watermark-bg p-1 rounded-xl">
+                                <!-- 星星 -->
+                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 relative">
+                                    <div class="flex items-center gap-2 min-w-[100px]">
+                                        <span class="text-lg">⭐</span>
+                                        <span class="text-xs sm:text-sm font-bold text-sky-400">星星将领</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button onclick="adjustValue('star', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center transition active:scale-95">-</button>
+                                        <input type="number" id="input-star" value="0" min="0" oninput="calculate()" class="w-16 sm:w-20 text-center bg-slate-950 border border-slate-700 rounded-lg py-1 text-amber-400 font-bold focus:outline-none focus:border-amber-500">
+                                        <button onclick="adjustValue('star', 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center transition active:scale-95">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- 月亮 -->
+                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 relative">
+                                    <div class="flex items-center gap-2 min-w-[100px]">
+                                        <span class="text-lg">🌙</span>
+                                        <span class="text-xs sm:text-sm font-bold text-purple-400">月亮将领</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button onclick="adjustValue('moon', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center transition active:scale-95">-</button>
+                                        <input type="number" id="input-moon" value="0" min="0" oninput="calculate()" class="w-16 sm:w-20 text-center bg-slate-950 border border-slate-700 rounded-lg py-1 text-purple-400 font-bold focus:outline-none focus:border-purple-500">
+                                        <button onclick="adjustValue('moon', 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center transition active:scale-95">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- 太阳 -->
+                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 relative">
+                                    <div class="flex items-center gap-2 min-w-[100px]">
+                                        <span class="text-lg">☀️</span>
+                                        <span class="text-xs sm:text-sm font-bold text-orange-400">太阳将领</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button onclick="adjustValue('sun', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center transition active:scale-95">-</button>
+                                        <input type="number" id="input-sun" value="0" min="0" oninput="calculate()" class="w-16 sm:w-20 text-center bg-slate-950 border border-slate-700 rounded-lg py-1 text-orange-400 font-bold focus:outline-none focus:border-orange-500">
+                                        <button onclick="adjustValue('sun', 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center transition active:scale-95">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- S级 -->
+                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 relative">
+                                    <div class="flex items-center gap-2 min-w-[100px]">
+                                        <span class="text-lg">🔥</span>
+                                        <span class="text-xs sm:text-sm font-bold text-red-400">S级将领</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button onclick="adjustValue('srank', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center transition active:scale-95">-</button>
+                                        <input type="number" id="input-srank" value="0" min="0" oninput="calculate()" class="w-16 sm:w-20 text-center bg-slate-950 border border-slate-700 rounded-lg py-1 text-red-400 font-bold focus:outline-none focus:border-red-500">
+                                        <button onclick="adjustValue('srank', 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center transition active:scale-95">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- SS级 -->
+                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 relative">
+                                    <div class="flex items-center gap-2 min-w-[100px]">
+                                        <span class="text-lg">👑</span>
+                                        <span class="text-xs sm:text-sm font-bold text-yellow-400">SS级将领</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button onclick="adjustValue('ssrank', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center transition active:scale-95">-</button>
+                                        <input type="number" id="input-ssrank" value="0" min="0" oninput="calculate()" class="w-16 sm:w-20 text-center bg-slate-950 border border-slate-700 rounded-lg py-1 text-yellow-400 font-bold focus:outline-none focus:border-yellow-500">
+                                        <button onclick="adjustValue('ssrank', 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center transition active:scale-95">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- 进阶石 -->
+                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-cyan-950/40 border border-cyan-500/30 relative">
+                                    <div class="flex items-center gap-2 min-w-[100px]">
+                                        <span class="text-lg">💎</span>
+                                        <span class="text-xs sm:text-sm font-bold text-cyan-300">进阶石数量</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button onclick="adjustValue('stone', -5)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center transition active:scale-95">-5</button>
+                                        <input type="number" id="input-stone" value="0" min="0" oninput="calculate()" class="w-16 sm:w-20 text-center bg-slate-950 border border-cyan-600 rounded-lg py-1 text-cyan-300 font-bold focus:outline-none focus:border-cyan-400">
+                                        <button onclick="adjustValue('stone', 5)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center transition active:scale-95">+5</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-corner-watermark">3k887忆春风制作</div>
+                        </div>
+
+                        <!-- 2. 目标等级推导 -->
+                        <div class="glass-panel rounded-2xl p-5 border border-slate-700/60 shadow-xl relative overflow-hidden">
+                            <h2 class="text-lg font-bold flex items-center gap-2 text-amber-400 mb-4 pb-3 border-b border-slate-700/50">
+                                <i class="fa-solid fa-bullseye"></i> 想要合成的目标
+                            </h2>
+                            
+                            <div class="grid grid-cols-2 gap-3 relative z-10">
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">目标等级</label>
+                                    <select id="target-level" onchange="calculate()" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-sm font-bold text-amber-300 focus:outline-none focus:border-amber-500">
+                                        <option value="moon">🌙 月亮将领</option>
+                                        <option value="sun">☀️ 太阳将领</option>
+                                        <option value="srank">🔥 S级将领</option>
+                                        <option value="ssrank" selected>👑 SS级将领</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">需求数量</label>
+                                    <div class="flex items-center gap-1">
+                                        <button onclick="adjustTargetCount(-1)" class="w-8 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center">-</button>
+                                        <input type="number" id="target-count" value="1" min="1" oninput="calculate()" class="w-full text-center bg-slate-950 border border-slate-700 rounded-lg py-1.5 text-amber-400 font-bold focus:outline-none focus:border-amber-500">
+                                        <button onclick="adjustTargetCount(1)" class="w-8 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-corner-watermark">3k887忆春风制作</div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧：计算结果展示 -->
+                    <div class="lg:col-span-7 space-y-6">
+
+                        <!-- 功能一：最大化合成结果 & 进阶石需求 -->
+                        <div class="glass-panel rounded-2xl p-5 border border-slate-700/60 shadow-xl relative overflow-hidden">
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.04]">
+                                <span class="text-5xl sm:text-6xl font-black tracking-widest text-amber-300 -rotate-12">
+                                    3k887忆春风制作
+                                </span>
+                            </div>
+
+                            <div id="mode-badge" class="absolute top-3 right-3 text-xs px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">
+                                常规模式 (6合1)
+                            </div>
+
+                            <h2 class="text-lg font-bold flex items-center gap-2 text-slate-200 mb-4">
+                                <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> 当前库存理论最高合成
+                            </h2>
+
+                            <!-- 阶梯合成卡片展示 -->
+                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-4 relative z-10">
+                                <div class="p-3 rounded-xl bg-slate-900/80 border border-yellow-500/30 text-center flex flex-col items-center justify-center">
+                                    <span class="text-xl mb-0.5">👑</span>
+                                    <span class="text-[11px] text-slate-400">最终SS级</span>
+                                    <span id="res-synth-ssrank" class="text-xl font-black text-yellow-400 mt-0.5">0</span>
+                                </div>
+                                <div class="p-3 rounded-xl bg-slate-900/50 border border-slate-800 text-center flex flex-col items-center justify-center">
+                                    <span class="text-xl mb-0.5">🔥</span>
+                                    <span class="text-[11px] text-slate-400">剩余S级</span>
+                                    <span id="res-synth-srank" class="text-lg font-bold text-red-400 mt-0.5">0</span>
+                                </div>
+                                <div class="p-3 rounded-xl bg-slate-900/50 border border-slate-800 text-center flex flex-col items-center justify-center">
+                                    <span class="text-xl mb-0.5">☀️</span>
+                                    <span class="text-[11px] text-slate-400">剩余太阳</span>
+                                    <span id="res-synth-sun" class="text-lg font-bold text-orange-400 mt-0.5">0</span>
+                                </div>
+                                <div class="p-3 rounded-xl bg-slate-900/50 border border-slate-800 text-center flex flex-col items-center justify-center">
+                                    <span class="text-xl mb-0.5">🌙</span>
+                                    <span class="text-[11px] text-slate-400">剩余月亮</span>
+                                    <span id="res-synth-moon" class="text-lg font-bold text-purple-400 mt-0.5">0</span>
+                                </div>
+                                <div class="p-3 rounded-xl bg-slate-900/50 border border-slate-800 text-center flex flex-col items-center justify-center col-span-2 sm:col-span-1">
+                                    <span class="text-xl mb-0.5">⭐</span>
+                                    <span class="text-[11px] text-slate-400">剩余星星</span>
+                                    <span id="res-synth-star" class="text-lg font-bold text-sky-400 mt-0.5">0</span>
+                                </div>
+                            </div>
+
+                            <!-- 进阶石消耗与实际受限推导提示 -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3 relative z-10">
+                                <div class="p-3 rounded-xl bg-cyan-950/30 border border-cyan-500/20 text-xs text-slate-300 space-y-1">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-cyan-400 font-semibold"><i class="fa-solid fa-gem mr-1"></i>理论合成所需进阶石：</span>
+                                        <strong id="res-synth-need-stones" class="text-cyan-300 font-black text-sm">0 个</strong>
+                                    </div>
+                                    <div class="flex justify-between items-center text-slate-400 text-[11px]">
+                                        <span>现有进阶石储备：</span>
+                                        <span id="res-synth-have-stones" class="font-bold text-slate-200">0 个</span>
+                                    </div>
+                                </div>
+
+                                <div id="stone-status-card" class="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs flex flex-col justify-center">
+                                    <div class="flex items-center gap-1.5 font-bold" id="stone-status-title">
+                                        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                                        <span>进阶石储备充足</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 mt-0.5" id="stone-status-desc">能顺畅完成所有将领进阶</p>
+                                </div>
+                            </div>
+
+                            <!-- 受限实际合成结果展示条 (仅在进阶石不够时触发显示) -->
+                            <div id="limited-synth-box" class="hidden p-3 rounded-xl bg-amber-950/40 border border-amber-500/30 text-xs text-amber-200 space-y-1 relative z-10">
+                                <div class="font-bold flex items-center gap-1.5 text-amber-400">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    <span>进阶石上限卡住！实际仅能合成：</span>
+                                </div>
+                                <p class="text-slate-300 font-medium" id="limited-synth-text">
+                                    用完当前 0 个进阶石后，最高完成合成：-
+                                </p>
+                            </div>
+
+                            <div class="mt-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400 flex justify-between items-center relative z-10">
+                                <span>当前所有库存折算为基础<strong class="text-amber-400">星星将领</strong>总量：</span>
+                                <span id="res-total-stars" class="text-sm font-black text-amber-400">0 个</span>
+                            </div>
+                            <div class="card-corner-watermark">3k887忆春风制作</div>
+                        </div>
+
+                        <!-- 功能二：目标缺口分析 (包含将领与进阶石) -->
+                        <div class="glass-panel rounded-2xl p-5 border border-slate-700/60 shadow-xl space-y-4 relative overflow-hidden">
+                            <h2 class="text-lg font-bold flex items-center gap-2 text-slate-200">
+                                <i class="fa-solid fa-calculator text-amber-400"></i> 目标缺口与补充建议
+                            </h2>
+
+                            <!-- 状态提示条 -->
+                            <div id="status-banner" class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-3 relative z-10">
+                                <div id="status-icon" class="text-2xl">💡</div>
+                                <div>
+                                    <div id="status-title" class="font-bold text-sm text-slate-200">请输入数据</div>
+                                    <div id="status-desc" class="text-xs text-slate-400">设定目标并输入现有资源以查看缺口分析</div>
+                                </div>
+                            </div>
+
+                            <!-- 目标分析数据对比 (将领 + 进阶石) -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs relative z-10">
+                                <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1">
+                                    <div class="text-slate-400">达成目标需要将领/进阶石：</div>
+                                    <div class="text-slate-200 font-bold">
+                                        ⭐ 星星: <span id="res-target-need-stars" class="text-amber-400">0</span> 个 | 
+                                        💎 石头: <span id="res-target-need-stones" class="text-cyan-400">0</span> 个
+                                    </div>
+                                </div>
+                                <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1">
+                                    <div class="text-slate-400">尚缺资源 (将领缺口 / 进阶石缺口)：</div>
+                                    <div class="text-slate-200 font-bold">
+                                        缺星: <span id="res-gap-stars-summary" class="text-red-400">0</span> | 
+                                        缺石头: <span id="res-gap-stones-summary" class="text-red-400">0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 缺口补充建议方案 -->
+                            <div id="gap-suggestion-box" class="pt-2 relative z-10">
+                                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5 flex justify-between items-center">
+                                    <span>若直接补充特定等级将领（尚差）：</span>
+                                    <span class="text-[10px] text-amber-500/50 font-normal">水印防伪：3k887忆春风制作</span>
+                                </h3>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                    <div class="p-2.5 rounded-xl bg-slate-900/40 border border-slate-800/80 text-center">
+                                        <div class="text-xs text-slate-400 mb-1">⭐ 星星</div>
+                                        <div id="gap-star" class="font-bold text-sky-400">0 个</div>
+                                    </div>
+                                    <div class="p-2.5 rounded-xl bg-slate-900/40 border border-slate-800/80 text-center">
+                                        <div class="text-xs text-slate-400 mb-1">🌙 月亮</div>
+                                        <div id="gap-moon" class="font-bold text-purple-400">0 个</div>
+                                    </div>
+                                    <div class="p-2.5 rounded-xl bg-slate-900/40 border border-slate-800/80 text-center">
+                                        <div class="text-xs text-slate-400 mb-1">☀️ 太阳</div>
+                                        <div id="gap-sun" class="font-bold text-orange-400">0 个</div>
+                                    </div>
+                                    <div id="gap-srank-container" class="p-2.5 rounded-xl bg-slate-900/40 border border-slate-800/80 text-center">
+                                        <div class="text-xs text-slate-400 mb-1">🔥 S级</div>
+                                        <div id="gap-srank" class="font-bold text-red-400">0 个</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-corner-watermark">3k887忆春风制作</div>
+                        </div>
+
+                        <!-- 进阶石与合成比例规则说明 -->
+                        <div class="glass-panel rounded-2xl p-4 border border-slate-700/60 text-xs text-slate-400 space-y-2 relative">
+                            <div class="flex flex-wrap justify-between items-center gap-2 font-semibold text-slate-300">
+                                <span class="text-cyan-400 flex items-center gap-1.5"><i class="fa-solid fa-gem"></i> 进阶石消耗规则：</span>
+                                <div class="flex items-center gap-1 sm:gap-2 flex-wrap text-slate-200">
+                                    <span>星 <i class="fa-solid fa-angle-right text-slate-500"></i> 月 <span class="text-amber-400 font-bold">(1)</span></span>
+                                    <span class="text-slate-600">|</span>
+                                    <span>月 <i class="fa-solid fa-angle-right text-slate-500"></i> 阳 <span class="text-amber-400 font-bold">(2)</span></span>
+                                    <span class="text-slate-600">|</span>
+                                    <span>阳 <i class="fa-solid fa-angle-right text-slate-500"></i> S <span class="text-amber-400 font-bold">(5)</span></span>
+                                    <span class="text-slate-600">|</span>
+                                    <span>S <i class="fa-solid fa-angle-right text-slate-500"></i> SS <span class="text-amber-400 font-bold">(10)</span></span>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap justify-between items-center gap-2 text-[11px] pt-2 border-t border-slate-800">
+                                <span id="rate-info" class="text-slate-300 font-medium">1月亮 = 6星 | 1太阳 = 36星 | 1S级 = 216星 | 1SS级 = 1296星</span>
+                                <span class="text-amber-500/50 font-bold ml-auto">3k887忆春风制作</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 页脚水印与版权说明 -->
+                <footer class="text-center text-xs text-slate-500 py-6 border-t border-slate-800/60 mt-8 space-y-2">
+                    <div class="flex items-center justify-center gap-2 text-amber-500/80 font-bold text-sm">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>将领合成计算机 &bull; 3k887忆春风制作</span>
+                    </div>
+                    <p class="text-slate-600 text-[11px]">
+                        全自动将领进阶与进阶石精算 &bull; 支持常规(6合1)及活动(5合1)模式
+                    </p>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- 视图 2: 遗迹载重匹配与计算工具 -->
+    <div id="app-yiji" class="app-view">
+        <div class="yj-scope">
+            <div class="container">
+                <header>
+                    <h1>🏛️ 遗迹载重匹配与计算工具</h1>
+                    <p>实时精准计算遗迹挂机载重需求、挂机时长及下一节点阶梯差距（支持正反向双向动态点击）</p>
+                </header>
+
+                <!-- Relic Type Selection Header -->
+                <div class="relic-selector" id="relicSelector">
+                    <div class="relic-card active" data-type="small">
+                        <div class="title">小型遗迹</div>
+                        <div class="rate">24,500 资源/分钟</div>
+                        <div class="badge">基础级 (0.74M/30分)</div>
+                    </div>
+                    <div class="relic-card" data-type="medium">
+                        <div class="title">中型遗迹</div>
+                        <div class="rate">44,200 资源/分钟</div>
+                        <div class="badge">进阶级 (1.33M/30分)</div>
+                    </div>
+                    <div class="relic-card" data-type="large">
+                        <div class="title">大型遗迹</div>
+                        <div class="rate">72,700 资源/分钟</div>
+                        <div class="badge">高级 (2.19M/30分)</div>
+                    </div>
+                    <div class="relic-card" data-type="mega">
+                        <div class="title">巨型遗迹</div>
+                        <div class="rate">118,000 资源/分钟</div>
+                        <div class="badge">史诗级 (3.54M/30分)</div>
+                    </div>
+                </div>
+
+                <!-- Mode Toggle Tabs -->
+                <div class="nav-tabs">
+                    <button class="tab-btn active" onclick="switchTab('loadMode')">⚡ 正向：输入当前载重算匹配</button>
+                    <button class="tab-btn" onclick="switchTab('targetMode')">🎯 反向：按时间/次数查所需载重</button>
+                </div>
+
+                <!-- TAB 1: Load Mode -->
+                <div id="loadMode" class="panel">
+                    <div class="panel-title">📦 输入您的部队总载重 (M)</div>
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <input type="number" id="loadInput" class="custom-input" placeholder="例如: 7.58" step="0.01" min="0" value="7.58" oninput="updateAllCalculations()">
+                            <span class="unit">M 载重</span>
+                        </div>
+                        <div class="quick-btns">
+                            <button class="btn-chip" onclick="addLoad(1)">+1M</button>
+                            <button class="btn-chip" onclick="addLoad(5)">+5M</button>
+                            <button class="btn-chip" onclick="addLoad(10)">+10M</button>
+                            <button class="btn-chip" onclick="addLoad(50)">+50M</button>
+                            <button class="btn-chip" onclick="addLoad(100)">+100M</button>
+                            <button class="btn-chip clear" onclick="clearLoad()">清空</button>
+                        </div>
+                    </div>
+
+                    <div class="results-grid">
+                        <div class="res-card">
+                            <span class="label">可容纳获取次数</span>
+                            <span class="val" id="resCount" style="color: var(--yj-accent-gold);">0 次</span>
+                            <span class="sub" id="resStepIndex">对应第 0 阶梯</span>
+                        </div>
+                        <div class="res-card">
+                            <span class="label">最长可挂机时间</span>
+                            <span class="val" id="resTime" style="color: var(--yj-accent-cyan);">0 小时 0 分</span>
+                            <span class="sub" id="resHours">约 0.0 小时</span>
+                        </div>
+                        <div class="res-card">
+                            <span class="label">预计获取资源总量</span>
+                            <span class="val" id="resResource" style="color: var(--yj-accent-purple);">0</span>
+                            <span class="sub" id="resRate">速率: 0/分</span>
+                        </div>
+                    </div>
+
+                    <!-- Distance to Next Tier Progress Bar -->
+                    <div class="progress-box">
+                        <div class="progress-header">
+                            <span>🚀 距离下一个载重点差距</span>
+                            <span id="progressText" class="gap-highlight">还差 0.00 M</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-footer">
+                            <span id="curNodeText">当前: 0 M</span>
+                            <span id="nextNodeText">下一目标: 0 M (+30分钟)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: Target Mode -->
+                <div id="targetMode" class="panel hidden">
+                    <div class="panel-title">🎯 选择期望获取次数/时长 (查所需载重)</div>
+                    <div class="input-group">
+                        <label class="input-label">输入精髓获取次数（每30分钟获取1次）：</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="targetCountInput" class="custom-input" min="1" value="10" oninput="updateAllCalculations()">
+                            <span class="unit">次 (即 <span id="targetHoursDisplay">5.0</span> 小时)</span>
+                        </div>
+                        <div class="quick-btns">
+                            <button class="btn-chip" onclick="addTargetCount(-10)">-10次</button>
+                            <button class="btn-chip" onclick="addTargetCount(-1)">-1次</button>
+                            <button class="btn-chip" onclick="addTargetCount(1)">+1次</button>
+                            <button class="btn-chip" onclick="addTargetCount(5)">+5次</button>
+                            <button class="btn-chip" onclick="addTargetCount(10)">+10次</button>
+                            <button class="btn-chip" onclick="setTargetCount(16)">8小时(16次)</button>
+                            <button class="btn-chip" onclick="setTargetCount(24)">12小时(24次)</button>
+                            <button class="btn-chip" onclick="setTargetCount(48)">24小时(48次)</button>
+                            <button class="btn-chip clear" onclick="clearTargetCount()">重置</button>
+                        </div>
+                    </div>
+
+                    <div class="results-grid">
+                        <div class="res-card">
+                            <span class="label">需要载重 (M)</span>
+                            <span class="val" id="targetReqLoad" style="color: var(--yj-accent-gold);">0 M</span>
+                            <span class="sub" id="targetFormulaSub">计算公式: ROUNDUP(次数 × 单次门槛, 2)</span>
+                        </div>
+                        <div class="res-card">
+                            <span class="label">对应挂机时间</span>
+                            <span class="val" id="targetDuration" style="color: var(--yj-accent-cyan);">0 小时</span>
+                            <span class="sub" id="targetTotalMins">共 0 分钟</span>
+                        </div>
+                        <div class="res-card">
+                            <span class="label">可收集资源总量</span>
+                            <span class="val" id="targetTotalResource" style="color: var(--yj-accent-green);">0</span>
+                            <span class="sub">全额无溢出收货</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tier Table Comparison Panel -->
+                <div class="panel">
+                    <div class="panel-title">📊 当前遗迹阶梯对照表（💡 点击任意行可动态带入值）</div>
+                    <div class="table-container" id="tableContainer">
+                        <table id="tierTable">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>挂机时长</th>
+                                    <th>获取次数</th>
+                                    <th>门槛载重 (M)</th>
+                                    <th>累计资源数量</th>
+                                    <th>状态匹配</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 视图 3: 逃出生天工具 -->
+    <div id="app-tcst" class="app-view">
+        <div class="tc-scope">
+            <!-- 顶部 -->
+            <header>
+                <h1>逃出生天工具</h1>
+                <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">切换白色</button>
+            </header>
+
+            <!-- 逃生路线及导引提示 -->
+            <div class="history-section">
+                <div class="history-header">
+                    <span id="mode-title">录入逃生路线</span>
+                    <span>共 <b id="step-count">0</b> 步</span>
+                </div>
+                <div class="history-list" id="historyList">
+                    <div class="empty-tip">记录逃生路径中...</div>
+                </div>
+                <div class="step-banner" id="stepBanner"></div>
+            </div>
+
+            <!-- 主体：方向控制台 -->
+            <div class="pad-container" id="padContainer">
+                <div class="dir-btn btn-up" onclick="addMove('↑')">↑</div>
+                <div class="dir-btn btn-left" onclick="addMove('←')">←</div>
+                <div class="dir-btn btn-center"></div>
+                <div class="dir-btn btn-right" onclick="addMove('→')">→</div>
+                <div class="dir-btn btn-down" onclick="addMove('↓')">↓</div>
+            </div>
+
+            <!-- 底部控制按钮 -->
+            <footer>
+                <div class="btn-group" id="normalControls">
+                    <button class="action-btn start-btn" onclick="startPlay()">开始逃生</button>
+                    <button class="action-btn undo-btn" onclick="undoMove()">撤销</button>
+                    <button class="action-btn reset-btn" onclick="resetMoves()">清空</button>
+                </div>
+
+                <div class="btn-group" id="playControls" style="display: none;">
+                    <button class="action-btn next-btn" onclick="nextStep()" id="nextBtn">下一步</button>
+                    <button class="action-btn undo-btn" onclick="exitPlay()">退出引导</button>
+                </div>
+
+                <div class="watermark">3k887忆春风出品</div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- 所有程序逻辑整合脚本 -->
+    <script>
+        // ================= 视图切换导航逻辑 =================
+        function switchAppView(viewName) {
+            document.querySelectorAll('.app-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.app-nav-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('app-' + viewName).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if(viewName === 'yiji') {
+                updateAllCalculations();
+            } else if(viewName === 'jiangling') {
+                calculate();
+            }
+        }
+
+        // ================= 1. 逃出生天工具 完整逻辑 =================
+        let history = [];
+        let isPlaying = false;
+        let currentStepIndex = 0;
+
+        function addMove(arrow) {
+            if (isPlaying) return;
+            history.push(arrow);
+            if (navigator.vibrate) navigator.vibrate(25);
+            updateUI();
+            autoScroll();
+        }
+
+        function undoMove() {
+            if (isPlaying || history.length === 0) return;
+            history.pop();
+            if (navigator.vibrate) navigator.vibrate(15);
+            updateUI();
+        }
+
+        function resetMoves() {
+            if (history.length === 0) return;
+            if (confirm("确定要清空当前的逃生路线吗？")) {
+                history = [];
+                exitPlay();
+                updateUI();
+            }
+        }
+
+        function startPlay() {
+            if (history.length === 0) {
+                alert("请先录入逃生路线！");
+                return;
+            }
+            isPlaying = true;
+            currentStepIndex = 0;
+            
+            document.getElementById('padContainer').classList.add('disabled');
+            document.getElementById('normalControls').style.display = 'none';
+            document.getElementById('playControls').style.display = 'flex';
+            document.getElementById('mode-title').innerText = '正在指引逃生';
+            
+            showStep(currentStepIndex);
+        }
+
+        function nextStep() {
+            if (currentStepIndex < history.length - 1) {
+                currentStepIndex++;
+                showStep(currentStepIndex);
+            } else {
+                document.getElementById('stepBanner').innerText = "🎉 成功逃出生天！";
+                document.getElementById('nextBtn').innerText = "重新引导";
+                document.getElementById('nextBtn').onclick = startPlay;
+            }
+        }
+
+        function showStep(index) {
+            if (navigator.vibrate) navigator.vibrate(20);
+            updateUI();
+            
+            const arrow = history[index];
+            document.getElementById('stepBanner').innerText = `第 ${index + 1} 步逃生路线：${arrow}`;
+            
+            if (index === history.length - 1) {
+                document.getElementById('nextBtn').innerText = "完成";
+            } else {
+                document.getElementById('nextBtn').innerText = "下一步";
+                document.getElementById('nextBtn').onclick = nextStep;
+            }
+
+            const activeElem = document.querySelector('#app-tcst .history-item.active');
+            if (activeElem) {
+                activeElem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
+
+        function exitPlay() {
+            isPlaying = false;
+            currentStepIndex = 0;
+            document.getElementById('padContainer').classList.remove('disabled');
+            document.getElementById('normalControls').style.display = 'flex';
+            document.getElementById('playControls').style.display = 'none';
+            document.getElementById('mode-title').innerText = '录入逃生路线';
+            document.getElementById('stepBanner').innerText = '';
+            document.getElementById('nextBtn').onclick = nextStep;
+            updateUI();
+        }
+
+        function updateUI() {
+            const historyList = document.getElementById('historyList');
+            const stepCount = document.getElementById('step-count');
+
+            stepCount.innerText = history.length;
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="empty-tip">记录逃生路径中...</div>';
+                return;
+            }
+
+            historyList.innerHTML = history.map((arrow, index) => {
+                const isActive = (isPlaying && index === currentStepIndex) ? 'active' : '';
+                return `
+                    <div class="history-item ${isActive}">
+                        <span class="step-num">${index + 1}.</span>${arrow}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function autoScroll() {
+            const historyList = document.getElementById('historyList');
+            historyList.scrollLeft = historyList.scrollWidth;
+        }
+
+        function toggleTheme() {
+            const htmlTag = document.documentElement;
+            const themeBtn = document.getElementById('themeBtn');
+            const currentTheme = htmlTag.getAttribute('data-theme');
+
+            if (currentTheme === 'dark') {
+                htmlTag.setAttribute('data-theme', 'light');
+                themeBtn.innerText = '切换黑色';
+            } else {
+                htmlTag.setAttribute('data-theme', 'dark');
+                themeBtn.innerText = '切换白色';
+            }
+        }
+
+        // ================= 2. 遗迹挂机计算器 完整逻辑 =================
+        const RELIC_CONFIG = {
+            small: {
+                name: '小型遗迹',
+                ratePerMin: 24500,
+                stepLoadA3: 0.74
+            },
+            medium: {
+                name: '中型遗迹',
+                ratePerMin: 44200,
+                stepLoadA3: 1.33
+            },
+            large: {
+                name: '大型遗迹',
+                ratePerMin: 72700,
+                stepLoadA3: 2.19
+            },
+            mega: {
+                name: '巨型遗迹',
+                ratePerMin: 118000,
+                stepLoadA3: 3.54
+            }
+        };
+
+        function getReqLoad(rate, count) {
+            if (count <= 0) return 0;
+            const raw = (rate * count * 30) / 1000000;
+            return Math.ceil(Math.round(raw * 1000000) / 10000) / 100;
+        }
+
+        function getCapacityCount(rate, load) {
+            if (load <= 0) return 0;
+            return Math.floor((load * 1000000) / (rate * 30));
+        }
+
+        function getTargetReqLoadExcel(stepLoadA3, count) {
+            if (count <= 0) return 0;
+            const raw = count * stepLoadA3;
+            return Math.ceil(Math.round(raw * 1000000) / 10000) / 100;
+        }
+
+        let currentType = 'small';
+        let currentTab = 'loadMode';
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('#app-yiji .nav-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (tabId === 'loadMode') {
+                document.querySelectorAll('#app-yiji .nav-tabs .tab-btn')[0].classList.add('active');
+                document.getElementById('loadMode').classList.remove('hidden');
+                document.getElementById('targetMode').classList.add('hidden');
+            } else {
+                document.querySelectorAll('#app-yiji .nav-tabs .tab-btn')[1].classList.add('active');
+                document.getElementById('loadMode').classList.add('hidden');
+                document.getElementById('targetMode').classList.remove('hidden');
+            }
+            updateAllCalculations();
+        }
+
+        function formatNumber(num) {
+            return Math.round(num).toLocaleString('zh-CN');
+        }
+
+        function addLoad(val) {
+            const input = document.getElementById('loadInput');
+            let cur = parseFloat(input.value) || 0;
+            input.value = Math.max(0, cur + val).toFixed(2);
+            updateAllCalculations();
+        }
+
+        function clearLoad() {
+            document.getElementById('loadInput').value = '';
+            updateAllCalculations();
+        }
+
+        function addTargetCount(val) {
+            const input = document.getElementById('targetCountInput');
+            let cur = parseInt(input.value) || 1;
+            input.value = Math.max(1, cur + val);
+            updateAllCalculations();
+        }
+
+        function setTargetCount(count) {
+            document.getElementById('targetCountInput').value = Math.max(1, count);
+            updateAllCalculations();
+        }
+
+        function clearTargetCount() {
+            document.getElementById('targetCountInput').value = 1;
+            updateAllCalculations();
+        }
+
+        function selectRow(count, reqLoad) {
+            if (currentTab === 'loadMode') {
+                document.getElementById('loadInput').value = reqLoad;
+            } else {
+                document.getElementById('targetCountInput').value = count;
+            }
+            updateAllCalculations();
+        }
+
+        function updateAllCalculations() {
+            const matchedCount = calculateLoadMode();
+            const targetCount = calculateTargetMode();
+            renderTable(matchedCount, targetCount);
+        }
+
+        function calculateLoadMode() {
+            const relic = RELIC_CONFIG[currentType];
+            const load = parseFloat(document.getElementById('loadInput').value) || 0;
+            
+            const count = getCapacityCount(relic.ratePerMin, load);
+            const timeMins = count * 30;
+            const hours = Math.floor(timeMins / 60);
+            const mins = timeMins % 60;
+            const totalResource = timeMins * relic.ratePerMin;
+
+            document.getElementById('resCount').innerText = count + ' 次';
+            document.getElementById('resStepIndex').innerText = count > 0 ? `匹配第 ${count} 阶梯` : '未达到最低要求阶梯';
+            document.getElementById('resTime').innerText = `${hours} 小时 ${mins} 分`;
+            document.getElementById('resHours').innerText = `约 ${(timeMins / 60).toFixed(1)} 小时`;
+            document.getElementById('resResource').innerText = formatNumber(totalResource);
+            document.getElementById('resRate').innerText = `速率: ${formatNumber(relic.ratePerMin)}/分`;
+
+            const curReq = getReqLoad(relic.ratePerMin, count);
+            const nextReq = getReqLoad(relic.ratePerMin, count + 1);
+            
+            let gap = (nextReq - load).toFixed(2);
+            if (gap <= 0) gap = "0.00";
+            
+            let range = nextReq - curReq;
+            let progress = range > 0 ? ((load - curReq) / range) * 100 : 0;
+            if (progress < 0) progress = 0;
+            if (progress > 100) progress = 100;
+
+            document.getElementById('progressText').innerText = `还差 ${gap} M 载重即可达到下一阶`;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('curNodeText').innerText = `当前载重: ${load.toFixed(2)} M (本阶门槛 ${curReq.toFixed(2)}M)`;
+            document.getElementById('nextNodeText').innerText = `目标: ${nextReq.toFixed(2)} M (+30分钟)`;
+
+            return count;
+        }
+
+        function calculateTargetMode() {
+            const relic = RELIC_CONFIG[currentType];
+            let count = parseInt(document.getElementById('targetCountInput').value) || 1;
+            if (count < 1) count = 1;
+
+            const timeMins = count * 30;
+            const hours = (timeMins / 60).toFixed(1);
+
+            const reqLoad = getTargetReqLoadExcel(relic.stepLoadA3, count).toFixed(2);
+            const totalResource = timeMins * relic.ratePerMin;
+
+            document.getElementById('targetHoursDisplay').innerText = hours;
+            document.getElementById('targetReqLoad').innerText = reqLoad + ' M';
+            document.getElementById('targetFormulaSub').innerText = `公式: ROUNDUP(${count}次 × ${relic.stepLoadA3}M, 2)`;
+            document.getElementById('targetDuration').innerText = `${Math.floor(timeMins/60)} 小时 ${timeMins%60} 分`;
+            document.getElementById('targetTotalMins').innerText = `共 ${timeMins} 分钟 (${hours}小时)`;
+            document.getElementById('targetTotalResource').innerText = formatNumber(totalResource);
+
+            return count;
+        }
+
+        function renderTable(matchedCount, targetCount) {
+            const relic = RELIC_CONFIG[currentType];
+            const tbody = document.getElementById('tableBody');
+            let html = '';
+
+            const focusCount = currentTab === 'loadMode' ? matchedCount : targetCount;
+            const maxRows = Math.max(58, focusCount + 10);
+
+            for (let i = 1; i <= maxRows; i++) {
+                const count = i;
+                const mins = count * 30;
+                const hours = (mins / 60).toFixed(1);
+                const reqLoad = getReqLoad(relic.ratePerMin, count).toFixed(2);
+                const totalResource = mins * relic.ratePerMin;
+
+                let rowClass = '';
+                let statusText = '点击套用';
+
+                if (currentTab === 'loadMode') {
+                    if (count === matchedCount) {
+                        rowClass = 'active-row';
+                        statusText = '🎯 当前匹配';
+                    } else if (count === matchedCount + 1) {
+                        rowClass = 'next-row';
+                        statusText = '⚡ 下一阶梯';
+                    }
+                } else {
+                    if (count === targetCount) {
+                        rowClass = 'target-row';
+                        statusText = '🎯 目标次数';
+                    }
+                }
+
+                html += `
+                    <tr id="row-${count}" class="${rowClass}" onclick="selectRow(${count}, ${reqLoad})">
+                        <td>第 ${count} 阶</td>
+                        <td>${hours} 小时 (${mins}分)</td>
+                        <td>${count} 次</td>
+                        <td><strong>${reqLoad} M</strong></td>
+                        <td>${formatNumber(totalResource)}</td>
+                        <td>${statusText}</td>
+                    </tr>
+                `;
+            }
+
+            tbody.innerHTML = html;
+
+            setTimeout(() => {
+                const activeRowId = currentTab === 'loadMode' ? `row-${matchedCount}` : `row-${targetCount}`;
+                const targetRowEl = document.getElementById(activeRowId);
+                if (targetRowEl) {
+                    targetRowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 80);
+        }
+
+        // ================= 3. 将领合成计算机 完整逻辑 =================
+        function generateWatermarks() {
+            const container = document.getElementById('watermark-container');
+            const watermarkText = "3k887忆春风制作";
+            let html = '';
+            for (let i = 0; i < 90; i++) {
+                html += `<div class="watermark-item">${watermarkText}</div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        let currentMode = 'normal';
+
+        const LEVELS = ['star', 'moon', 'sun', 'srank', 'ssrank'];
+        const LEVEL_NAMES = {
+            star: '星星将领',
+            moon: '月亮将领',
+            sun: '太阳将领',
+            srank: 'S级将领',
+            ssrank: 'SS级将领'
+        };
+
+        const STONE_COSTS = {
+            moon: 1,
+            sun: 2,
+            srank: 5,
+            ssrank: 10
+        };
+
+        function setMode(mode) {
+            currentMode = mode;
+            const normalBtn = document.getElementById('mode-normal-btn');
+            const eventBtn = document.getElementById('mode-event-btn');
+            const modeBadge = document.getElementById('mode-badge');
+
+            if (mode === 'normal') {
+                normalBtn.className = "relative z-10 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 text-white bg-slate-800 shadow-lg border border-slate-600";
+                eventBtn.className = "relative z-10 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 text-slate-400 hover:text-white";
+                modeBadge.className = "absolute top-3 right-3 text-xs px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold";
+                modeBadge.innerText = "常规模式 (6合1)";
+            } else {
+                eventBtn.className = "relative z-10 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 text-white bg-red-600 shadow-lg shadow-red-900/50";
+                normalBtn.className = "relative z-10 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 text-slate-400 hover:text-white";
+                modeBadge.className = "absolute top-3 right-3 text-xs px-2.5 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-500/40 font-semibold";
+                modeBadge.innerText = "限时活动 (5合1)";
+            }
+
+            calculate();
+        }
+
+        function adjustValue(id, delta) {
+            const input = document.getElementById(`input-${id}`);
+            let val = parseInt(input.value) || 0;
+            val = Math.max(0, val + delta);
+            input.value = val;
+            calculate();
+        }
+
+        function adjustTargetCount(delta) {
+            const input = document.getElementById('target-count');
+            let val = parseInt(input.value) || 1;
+            val = Math.max(1, val + delta);
+            input.value = val;
+            calculate();
+        }
+
+        function clearInventory() {
+            LEVELS.forEach(lvl => {
+                document.getElementById(`input-${lvl}`).value = 0;
+            });
+            document.getElementById('input-stone').value = 0;
+            calculate();
+        }
+
+        function fillDemoData() {
+            document.getElementById('input-star').value = 28;
+            document.getElementById('input-moon').value = 8;
+            document.getElementById('input-sun').value = 4;
+            document.getElementById('input-srank').value = 2;
+            document.getElementById('input-ssrank').value = 0;
+            document.getElementById('input-stone').value = 25;
+            calculate();
+        }
+
+        function getRatio() {
+            return currentMode === 'event' ? 5 : 6;
+        }
+
+        function getStarEquivalent(level, ratio) {
+            switch(level) {
+                case 'star': return 1;
+                case 'moon': return ratio;
+                case 'sun': return Math.pow(ratio, 2);
+                case 'srank': return Math.pow(ratio, 3);
+                case 'ssrank': return Math.pow(ratio, 4);
+                default: return 1;
+            }
+        }
+
+        function getStonesNeededForSingleTarget(level, ratio) {
+            if (level === 'star') return 0;
+            if (level === 'moon') return STONE_COSTS.moon;
+            if (level === 'sun') return ratio * getStonesNeededForSingleTarget('moon', ratio) + STONE_COSTS.sun;
+            if (level === 'srank') return ratio * getStonesNeededForSingleTarget('sun', ratio) + STONE_COSTS.srank; 
+            if (level === 'ssrank') return ratio * getStonesNeededForSingleTarget('srank', ratio) + STONE_COSTS.ssrank;
+            return 0;
+        }
+
+        function calculate() {
+            const ratio = getRatio();
+
+            const inventory = {};
+            LEVELS.forEach(lvl => {
+                inventory[lvl] = Math.max(0, parseInt(document.getElementById(`input-${lvl}`).value) || 0);
+            });
+            const haveStones = Math.max(0, parseInt(document.getElementById('input-stone').value) || 0);
+
+            const targetLevel = document.getElementById('target-level').value;
+            const targetCount = Math.max(1, parseInt(document.getElementById('target-count').value) || 1);
+
+            const starPerMoon = ratio;
+            const starPerSun = Math.pow(ratio, 2);
+            const starPerS = Math.pow(ratio, 3);
+            const starPerSS = Math.pow(ratio, 4);
+            document.getElementById('rate-info').innerText = 
+                `1月亮 = ${starPerMoon}星 | 1太阳 = ${starPerSun}星 | 1S级 = ${starPerS}星 | 1SS级 = ${starPerSS}星`;
+
+            let starFromBottom = inventory.star;
+            
+            let newMoonCreated = Math.floor(starFromBottom / ratio);
+            let remStar = starFromBottom % ratio;
+
+            let totalMoonAvailable = inventory.moon + newMoonCreated;
+            let newSunCreated = Math.floor(totalMoonAvailable / ratio);
+            let remMoon = totalMoonAvailable % ratio;
+
+            let totalSunAvailable = inventory.sun + newSunCreated;
+            let newSCreated = Math.floor(totalSunAvailable / ratio);
+            let remSun = totalSunAvailable % ratio;
+
+            let totalSAvailable = inventory.srank + newSCreated;
+            let newSSCreated = Math.floor(totalSAvailable / ratio);
+            let remS = totalSAvailable % ratio;
+
+            let finalSS = inventory.ssrank + newSSCreated;
+
+            const stonesForMoon = newMoonCreated * STONE_COSTS.moon;
+            const stonesForSun = newSunCreated * STONE_COSTS.sun;
+            const stonesForS = newSCreated * STONE_COSTS.srank;
+            const stonesForSS = newSSCreated * STONE_COSTS.ssrank;
+
+            const totalStonesNeededTheoretical = stonesForMoon + stonesForSun + stonesForS + stonesForSS;
+
+            document.getElementById('res-synth-ssrank').innerText = finalSS;
+            document.getElementById('res-synth-srank').innerText = remS;
+            document.getElementById('res-synth-sun').innerText = remSun;
+            document.getElementById('res-synth-moon').innerText = remMoon;
+            document.getElementById('res-synth-star').innerText = remStar;
+
+            document.getElementById('res-synth-need-stones').innerText = `${totalStonesNeededTheoretical.toLocaleString()} 个`;
+            document.getElementById('res-synth-have-stones').innerText = `${haveStones.toLocaleString()} 个`;
+
+            const stoneCard = document.getElementById('stone-status-card');
+            const stoneTitle = document.getElementById('stone-status-title');
+            const stoneDesc = document.getElementById('stone-status-desc');
+            const limitedBox = document.getElementById('limited-synth-box');
+
+            if (haveStones >= totalStonesNeededTheoretical) {
+                stoneCard.className = "p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-xs flex flex-col justify-center";
+                stoneTitle.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i><span class="text-emerald-300">进阶石储备充足</span>`;
+                stoneDesc.innerText = `完全满足理论合成（余 ${haveStones - totalStonesNeededTheoretical} 石）`;
+                limitedBox.classList.add('hidden');
+            } else {
+                const stoneGap = totalStonesNeededTheoretical - haveStones;
+                stoneCard.className = "p-3 rounded-xl bg-red-950/40 border border-red-500/30 text-xs flex flex-col justify-center";
+                stoneTitle.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-400"></i><span class="text-red-300">进阶石短缺 ${stoneGap} 个</span>`;
+                stoneDesc.innerText = `需 ${totalStonesNeededTheoretical} 个，还差 ${stoneGap} 个`;
+
+                limitedBox.classList.remove('hidden');
+                let budgetStones = haveStones;
+
+                let actNewMoon = Math.min(newMoonCreated, Math.floor(budgetStones / STONE_COSTS.moon));
+                budgetStones -= actNewMoon * STONE_COSTS.moon;
+
+                let actTotalMoon = inventory.moon + actNewMoon;
+                let actPossibleSun = Math.floor(actTotalMoon / ratio);
+                let actNewSun = Math.min(actPossibleSun, Math.floor(budgetStones / STONE_COSTS.sun));
+                budgetStones -= actNewSun * STONE_COSTS.sun;
+
+                let actTotalSun = inventory.sun + actNewSun;
+                let actPossibleS = Math.floor(actTotalSun / ratio);
+                let actNewS = Math.min(actPossibleS, Math.floor(budgetStones / STONE_COSTS.srank));
+                budgetStones -= actNewS * STONE_COSTS.srank;
+
+                let actTotalS = inventory.srank + actNewS;
+                let actPossibleSS = Math.floor(actTotalS / ratio);
+                let actNewSS = Math.min(actPossibleSS, Math.floor(budgetStones / STONE_COSTS.ssrank));
+
+                let actFinalSS = inventory.ssrank + actNewSS;
+
+                document.getElementById('limited-synth-text').innerText = 
+                    `在已有 ${haveStones} 个进阶石限制下，最高可得到 ${actFinalSS} 个 SS级将领。`;
+            }
+
+            let totalStarsHave = 0;
+            LEVELS.forEach(lvl => {
+                totalStarsHave += inventory[lvl] * getStarEquivalent(lvl, ratio);
+            });
+            document.getElementById('res-total-stars').innerText = `${totalStarsHave.toLocaleString()} 个`;
+
+            const singleTargetStars = getStarEquivalent(targetLevel, ratio);
+            const totalTargetStarsNeeded = singleTargetStars * targetCount;
+
+            const singleTargetStoneCost = getStonesNeededForSingleTarget(targetLevel, ratio);
+            const totalTargetStonesNeeded = singleTargetStoneCost * targetCount;
+
+            document.getElementById('res-target-need-stars').innerText = `${totalTargetStarsNeeded.toLocaleString()}`;
+            document.getElementById('res-target-need-stones').innerText = `${totalTargetStonesNeeded.toLocaleString()}`;
+
+            const statusBanner = document.getElementById('status-banner');
+            const statusIcon = document.getElementById('status-icon');
+            const statusTitle = document.getElementById('status-title');
+            const statusDesc = document.getElementById('status-desc');
+            const gapBox = document.getElementById('gap-suggestion-box');
+
+            const starDeficit = Math.max(0, totalTargetStarsNeeded - totalStarsHave);
+            const stoneDeficit = Math.max(0, totalTargetStonesNeeded - haveStones);
+
+            document.getElementById('res-gap-stars-summary').innerText = starDeficit > 0 ? `${starDeficit.toLocaleString()}个` : '足够';
+            document.getElementById('res-gap-stones-summary').innerText = stoneDeficit > 0 ? `${stoneDeficit.toLocaleString()}个` : '足够';
+
+            if (starDeficit === 0 && stoneDeficit === 0) {
+                statusBanner.className = "p-4 rounded-xl bg-emerald-950/60 border border-emerald-500/40 flex items-center gap-3 relative z-10";
+                statusIcon.innerText = "🎉";
+                statusTitle.className = "font-bold text-sm text-emerald-300";
+                statusTitle.innerText = "恭喜！将领与进阶石均完全满足目标要求";
+                statusDesc.innerText = `拥有折算 ${totalStarsHave} 颗星 (需 ${totalTargetStarsNeeded})，进阶石 ${haveStones} 个 (需 ${totalTargetStonesNeeded})。`;
+
+                document.getElementById('gap-star').innerText = "0 个";
+                document.getElementById('gap-moon').innerText = "0 个";
+                document.getElementById('gap-sun').innerText = "0 个";
+                document.getElementById('gap-srank').innerText = "0 个";
+                gapBox.classList.add('opacity-40');
+            } else {
+                gapBox.classList.remove('opacity-40');
+                statusBanner.className = "p-4 rounded-xl bg-red-950/50 border border-red-500/40 flex items-center gap-3 relative z-10";
+                statusIcon.innerText = "⚠️";
+                statusTitle.className = "font-bold text-sm text-red-300";
+
+                let promptMsg = [];
+                if (starDeficit > 0) promptMsg.push(`尚缺 ${starDeficit.toLocaleString()} 基础星星将领`);
+                if (stoneDeficit > 0) promptMsg.push(`尚缺 ${stoneDeficit.toLocaleString()} 个进阶石`);
+
+                statusTitle.innerText = promptMsg.join('；');
+                statusDesc.innerText = `目前将领进度: ${((totalStarsHave/totalTargetStarsNeeded)*100).toFixed(1)}% | 进阶石进度: ${((haveStones/Math.max(1, totalTargetStonesNeeded))*100).toFixed(1)}%`;
+
+                const gapStarNeeded = starDeficit;
+                const gapMoonNeeded = Math.ceil(starDeficit / getStarEquivalent('moon', ratio));
+                const gapSunNeeded = Math.ceil(starDeficit / getStarEquivalent('sun', ratio));
+                const gapSNeeded = Math.ceil(starDeficit / getStarEquivalent('srank', ratio));
+
+                document.getElementById('gap-star').innerText = `${gapStarNeeded.toLocaleString()} 个`;
+                document.getElementById('gap-moon').innerText = `${gapMoonNeeded.toLocaleString()} 个`;
+                document.getElementById('gap-sun').innerText = `${gapSunNeeded.toLocaleString()} 个`;
+
+                const sRankContainer = document.getElementById('gap-srank-container');
+                if (targetLevel === 'ssrank') {
+                    sRankContainer.style.display = 'block';
+                    document.getElementById('gap-srank').innerText = `${gapSNeeded.toLocaleString()} 个`;
+                } else {
+                    sRankContainer.style.display = 'none';
+                }
+            }
+        }
+
+        // 初始化加载
+        window.onload = function() {
+            // 初始化将领计算机
+            generateWatermarks();
+            calculate();
+
+            // 初始化遗迹卡片事件
+            document.querySelectorAll('#app-yiji .relic-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('#app-yiji .relic-card').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    currentType = this.getAttribute('data-type');
+                    updateAllCalculations();
+                });
+            });
+            updateAllCalculations();
+        };
+    </script>
+</body>
+</html>
