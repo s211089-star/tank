@@ -1174,7 +1174,7 @@
         </div>
     </div>
 
-    <!-- 视图 2: 遗迹载重匹配与计算工具（最新替换版本） -->
+    <!-- 视图 2: 遗迹载重匹配与计算工具（大型遗迹已修改为 85,500/分） -->
     <div id="app-yiji" class="app-view">
         <div class="yj-scope">
             <div class="container">
@@ -1197,8 +1197,8 @@
                     </div>
                     <div class="relic-card" data-type="large">
                         <div class="title">大型遗迹</div>
-                        <div class="rate">72,700 资源/分钟</div>
-                        <div class="badge">高级 (2.19M/30分)</div>
+                        <div class="rate">85,500 资源/分钟</div>
+                        <div class="badge">高级 (2.57M/30分)</div>
                     </div>
                     <div class="relic-card" data-type="mega">
                         <div class="title">巨型遗迹</div>
@@ -1524,7 +1524,7 @@
             }
         }
 
-        // ================= 2. 遗迹挂机计算器 最新逻辑 =================
+        // ================= 2. 遗迹挂机计算器 最新逻辑（大型遗迹已更新为85,500/分） =================
         const RELIC_CONFIG = {
             small: {
                 name: '小型遗迹',
@@ -1538,8 +1538,8 @@
             },
             large: {
                 name: '大型遗迹',
-                ratePerMin: 72700,
-                stepLoadA3: 2.19 // Excel A3 = ROUNDUP(72700*30/1e6, 2)
+                ratePerMin: 85500,
+                stepLoadA3: 2.57 // Excel A3 = ROUNDUP(85500*30/1e6, 2)
             },
             mega: {
                 name: '巨型遗迹',
