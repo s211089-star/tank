@@ -69,7 +69,6 @@
             --tc-active-item-bg: #d1e7dd;
         }
 
-        /* 逃出生天专属隔离类 */
         .tc-scope {
             background-color: var(--tc-bg-color);
             color: var(--tc-text-color);
@@ -1175,7 +1174,7 @@
         </div>
     </div>
 
-    <!-- 视图 2: 遗迹载重匹配与计算工具 -->
+    <!-- 视图 2: 遗迹载重匹配与计算工具（最新替换版本） -->
     <div id="app-yiji" class="app-view">
         <div class="yj-scope">
             <div class="container">
@@ -1188,8 +1187,8 @@
                 <div class="relic-selector" id="relicSelector">
                     <div class="relic-card active" data-type="small">
                         <div class="title">小型遗迹</div>
-                        <div class="rate">24,500 资源/分钟</div>
-                        <div class="badge">基础级 (0.74M/30分)</div>
+                        <div class="rate">29,500 资源/分钟</div>
+                        <div class="badge">基础级 (0.89M/30分)</div>
                     </div>
                     <div class="relic-card" data-type="medium">
                         <div class="title">中型遗迹</div>
@@ -1525,41 +1524,44 @@
             }
         }
 
-        // ================= 2. 遗迹挂机计算器 完整逻辑 =================
+        // ================= 2. 遗迹挂机计算器 最新逻辑 =================
         const RELIC_CONFIG = {
             small: {
                 name: '小型遗迹',
-                ratePerMin: 24500,
-                stepLoadA3: 0.74
+                ratePerMin: 29500,
+                stepLoadA3: 0.89 // Excel A3 = ROUNDUP(29500*30/1e6, 2)
             },
             medium: {
                 name: '中型遗迹',
                 ratePerMin: 44200,
-                stepLoadA3: 1.33
+                stepLoadA3: 1.33 // Excel A3 = ROUNDUP(44200*30/1e6, 2)
             },
             large: {
                 name: '大型遗迹',
                 ratePerMin: 72700,
-                stepLoadA3: 2.19
+                stepLoadA3: 2.19 // Excel A3 = ROUNDUP(72700*30/1e6, 2)
             },
             mega: {
                 name: '巨型遗迹',
                 ratePerMin: 118000,
-                stepLoadA3: 3.54
+                stepLoadA3: 3.54 // Excel A3 = ROUNDUP(118000*30/1e6, 2)
             }
         };
 
+        // Excel 公式 1 (表格列): ROUNDUP($E$3 * count * 30 / 1000000, 2)
         function getReqLoad(rate, count) {
             if (count <= 0) return 0;
             const raw = (rate * count * 30) / 1000000;
             return Math.ceil(Math.round(raw * 1000000) / 10000) / 100;
         }
 
+        // Excel 公式 2 (可容纳次数): ROUNDDOWN((F3 * 1000000) / (rate * 30), 0)
         function getCapacityCount(rate, load) {
             if (load <= 0) return 0;
             return Math.floor((load * 1000000) / (rate * 30));
         }
 
+        // Excel 公式 3 (反向查找 H5): ROUNDUP(H3 * A3, 2)
         function getTargetReqLoadExcel(stepLoadA3, count) {
             if (count <= 0) return 0;
             const raw = count * stepLoadA3;
