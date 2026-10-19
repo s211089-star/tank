@@ -371,6 +371,12 @@
             text-align: center;
             position: relative;
             overflow: hidden;
+            user-select: none;
+        }
+
+        /* 解决点击穿透阻断问题的关键点：屏蔽卡片内部所有节点的点击事件 */
+        .yj-scope .relic-card * {
+            pointer-events: none;
         }
 
         .yj-scope .relic-card:hover {
@@ -800,13 +806,13 @@
 
     <!-- 万能整合导航栏 -->
     <nav class="app-nav">
-        <button class="app-nav-btn active" onclick="switchAppView('jiangling')">
+        <button class="app-nav-btn active" onclick="switchAppView('jiangling', event)">
             <i class="fa-solid fa-chess-knight"></i> 将领合成计算机
         </button>
-        <button class="app-nav-btn" onclick="switchAppView('yiji')">
+        <button class="app-nav-btn" onclick="switchAppView('yiji', event)">
             <i class="fa-solid fa-landmark"></i> 遗迹载重匹配与计算
         </button>
-        <button class="app-nav-btn" onclick="switchAppView('tcst')">
+        <button class="app-nav-btn" onclick="switchAppView('tcst', event)">
             <i class="fa-solid fa-compass"></i> 逃出生天工具
         </button>
     </nav>
@@ -1174,7 +1180,7 @@
         </div>
     </div>
 
-    <!-- 视图 2: 遗迹载重匹配与计算工具（中型遗迹已修改为 53,500/分） -->
+    <!-- 视图 2: 遗迹载重匹配与计算工具 -->
     <div id="app-yiji" class="app-view">
         <div class="yj-scope">
             <div class="container">
@@ -1185,22 +1191,22 @@
 
                 <!-- Relic Type Selection Header -->
                 <div class="relic-selector" id="relicSelector">
-                    <div class="relic-card active" data-type="small">
+                    <div class="relic-card active" data-type="small" onclick="selectRelic('small')">
                         <div class="title">小型遗迹</div>
                         <div class="rate">29,500 资源/分钟</div>
                         <div class="badge">基础级 (0.89M/30分)</div>
                     </div>
-                    <div class="relic-card" data-type="medium">
+                    <div class="relic-card" data-type="medium" onclick="selectRelic('medium')">
                         <div class="title">中型遗迹</div>
                         <div class="rate">53,500 资源/分钟</div>
                         <div class="badge">进阶级 (1.61M/30分)</div>
                     </div>
-                    <div class="relic-card" data-type="large">
+                    <div class="relic-card" data-type="large" onclick="selectRelic('large')">
                         <div class="title">大型遗迹</div>
                         <div class="rate">85,500 资源/分钟</div>
                         <div class="badge">高级 (2.57M/30分)</div>
                     </div>
-                    <div class="relic-card" data-type="mega">
+                    <div class="relic-card" data-type="mega" onclick="selectRelic('mega')">
                         <div class="title">巨型遗迹</div>
                         <div class="rate">118,000 资源/分钟</div>
                         <div class="badge">史诗级 (3.54M/30分)</div>
@@ -1382,12 +1388,14 @@
     <!-- 所有程序逻辑整合脚本 -->
     <script>
         // ================= 视图切换导航逻辑 =================
-        function switchAppView(viewName) {
+        function switchAppView(viewName, evt) {
             document.querySelectorAll('.app-view').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.app-nav-btn').forEach(el => el.classList.remove('active'));
             
             document.getElementById('app-' + viewName).classList.add('active');
-            event.currentTarget.classList.add('active');
+            if (evt && evt.currentTarget) {
+                evt.currentTarget.classList.add('active');
+            }
 
             if(viewName === 'yiji') {
                 updateAllCalculations();
@@ -1524,52 +1532,63 @@
             }
         }
 
-        // ================= 2. 遗迹挂机计算器 最新逻辑（中型遗迹已更新为 53,500/分） =================
+        // ================= 2. 遗迹挂机计算器 逻辑 =================
         const RELIC_CONFIG = {
             small: {
                 name: '小型遗迹',
                 ratePerMin: 29500,
-                stepLoadA3: 0.89 // Excel A3 = ROUNDUP(29500*30/1e6, 2)
+                stepLoadA3: 0.89
             },
             medium: {
                 name: '中型遗迹',
                 ratePerMin: 53500,
-                stepLoadA3: 1.61 // Excel A3 = ROUNDUP(53500*30/1e6, 2)
+                stepLoadA3: 1.61
             },
             large: {
                 name: '大型遗迹',
                 ratePerMin: 85500,
-                stepLoadA3: 2.57 // Excel A3 = ROUNDUP(85500*30/1e6, 2)
+                stepLoadA3: 2.57
             },
             mega: {
                 name: '巨型遗迹',
                 ratePerMin: 118000,
-                stepLoadA3: 3.54 // Excel A3 = ROUNDUP(118000*30/1e6, 2)
+                stepLoadA3: 3.54
             }
         };
 
-        // Excel 公式 1 (表格列): ROUNDUP($E$3 * count * 30 / 1000000, 2)
+        let currentType = 'small';
+        let currentTab = 'loadMode';
+
+        // 选定遗迹类型的专用全局高可靠方法
+        function selectRelic(type) {
+            currentType = type;
+            const cards = document.querySelectorAll('#relicSelector .relic-card');
+            cards.forEach(c => {
+                if (c.getAttribute('data-type') === type) {
+                    c.classList.add('active');
+                } else {
+                    c.classList.remove('active');
+                }
+            });
+            updateAllCalculations();
+        }
+
         function getReqLoad(rate, count) {
             if (count <= 0) return 0;
             const raw = (rate * count * 30) / 1000000;
             return Math.ceil(Math.round(raw * 1000000) / 10000) / 100;
         }
 
-        // Excel 公式 2 (可容纳次数): ROUNDDOWN((F3 * 1000000) / (rate * 30), 0)
         function getCapacityCount(rate, load) {
             if (load <= 0) return 0;
             return Math.floor((load * 1000000) / (rate * 30));
         }
 
-        // Excel 公式 3 (反向查找 H5): ROUNDUP(H3 * A3, 2)
         function getTargetReqLoadExcel(stepLoadA3, count) {
             if (count <= 0) return 0;
             const raw = count * stepLoadA3;
             return Math.ceil(Math.round(raw * 1000000) / 10000) / 100;
         }
-
-        let currentType = 'small';
-        let currentTab = 'loadMode';
 
         function switchTab(tabId) {
             currentTab = tabId;
@@ -1851,7 +1870,7 @@
             if (level === 'moon') return STONE_COSTS.moon;
             if (level === 'sun') return ratio * getStonesNeededForSingleTarget('moon', ratio) + STONE_COSTS.sun;
             if (level === 'srank') return ratio * getStonesNeededForSingleTarget('sun', ratio) + STONE_COSTS.srank; 
-            if (level === 'ssrank') return ratio * getStonesNeededForSingleTarget('ssrank', ratio) + STONE_COSTS.ssrank;
+            if (level === 'ssrank') return ratio * getStonesNeededForSingleTarget('srank', ratio) + STONE_COSTS.ssrank;
             return 0;
         }
 
@@ -2024,19 +2043,8 @@
 
         // 初始化加载
         window.onload = function() {
-            // 初始化将领计算机
             generateWatermarks();
             calculate();
-
-            // 初始化遗迹卡片事件
-            document.querySelectorAll('#app-yiji .relic-card').forEach(card => {
-                card.addEventListener('click', function() {
-                    document.querySelectorAll('#app-yiji .relic-card').forEach(c => c.classList.remove('active'));
-                    this.classList.add('active');
-                    currentType = this.getAttribute('data-type');
-                    updateAllCalculations();
-                });
-            });
             updateAllCalculations();
         };
     </script>
