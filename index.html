@@ -1174,7 +1174,7 @@
         </div>
     </div>
 
-    <!-- 视图 2: 遗迹载重匹配与计算工具（大型遗迹已修改为 85,500/分） -->
+    <!-- 视图 2: 遗迹载重匹配与计算工具（中型遗迹已修改为 53,500/分） -->
     <div id="app-yiji" class="app-view">
         <div class="yj-scope">
             <div class="container">
@@ -1192,8 +1192,8 @@
                     </div>
                     <div class="relic-card" data-type="medium">
                         <div class="title">中型遗迹</div>
-                        <div class="rate">44,200 资源/分钟</div>
-                        <div class="badge">进阶级 (1.33M/30分)</div>
+                        <div class="rate">53,500 资源/分钟</div>
+                        <div class="badge">进阶级 (1.61M/30分)</div>
                     </div>
                     <div class="relic-card" data-type="large">
                         <div class="title">大型遗迹</div>
@@ -1524,7 +1524,7 @@
             }
         }
 
-        // ================= 2. 遗迹挂机计算器 最新逻辑（大型遗迹已更新为85,500/分） =================
+        // ================= 2. 遗迹挂机计算器 最新逻辑（中型遗迹已更新为 53,500/分） =================
         const RELIC_CONFIG = {
             small: {
                 name: '小型遗迹',
@@ -1533,8 +1533,8 @@
             },
             medium: {
                 name: '中型遗迹',
-                ratePerMin: 44200,
-                stepLoadA3: 1.33 // Excel A3 = ROUNDUP(44200*30/1e6, 2)
+                ratePerMin: 53500,
+                stepLoadA3: 1.61 // Excel A3 = ROUNDUP(53500*30/1e6, 2)
             },
             large: {
                 name: '大型遗迹',
@@ -1851,7 +1851,7 @@
             if (level === 'moon') return STONE_COSTS.moon;
             if (level === 'sun') return ratio * getStonesNeededForSingleTarget('moon', ratio) + STONE_COSTS.sun;
             if (level === 'srank') return ratio * getStonesNeededForSingleTarget('sun', ratio) + STONE_COSTS.srank; 
-            if (level === 'ssrank') return ratio * getStonesNeededForSingleTarget('srank', ratio) + STONE_COSTS.ssrank;
+            if (level === 'ssrank') return ratio * getStonesNeededForSingleTarget('ssrank', ratio) + STONE_COSTS.ssrank;
             return 0;
         }
 
